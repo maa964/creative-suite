@@ -1,9 +1,12 @@
+# app/ui/main.py
 import sys
 import json
 import logging
 from pathlib import Path
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QLabel
 from PySide6.QtCore import Qt
+
+from app.core.plugin_host import PluginHost  # 追加
 
 LOG = logging.getLogger("creative")
 LOG.setLevel(logging.DEBUG)
@@ -44,6 +47,15 @@ class MainWindow(QMainWindow):
             self.setCentralWidget(self.label)
             plugins = safe_load_plugins(APP_ROOT / "plugins")
             LOG.info("loaded plugins: %s", [p[0] for p in plugins])
+
+            # PluginHost を使って登録（ホスト側で例外吸収・ログ化）
+            try:
+                host = PluginHost(APP_ROOT / 'plugins', app_api={'name':'CreativeStudioHost'})
+                reg = host.register_all()
+                LOG.info('plugin host registration results: %s', reg)
+            except Exception as e:
+                LOG.exception('PluginHost registration error: %s', e)
+
         except Exception as e:
             LOG.exception("UI init failed: %s", e)
             QMessageBox.critical(self, "初期化エラー", f"UIの初期化に失敗しました:\n{e}")
