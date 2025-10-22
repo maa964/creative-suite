@@ -1,0 +1,16 @@
+{
+  "name": "sample_plugin_ai",
+  "entry": "plugins.sample_plugin_ai.plugin:register",
+  "version": "0.1.0",
+  "description": "AIカラーライズ - ローカルモデルが無ければヒューリスティック補完で代替します。",
+  "commands": {
+    "colorize": {
+      "description": "画像をカラーライズします",
+      "params": [
+        "input_path",
+        "output_path",
+        "method"
+      ]
+    }
+  }
+}

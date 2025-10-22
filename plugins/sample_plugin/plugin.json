@@ -1,0 +1,6 @@
+{
+  "name": "sample_plugin",
+  "entry": "plugins.sample_plugin.plugin:register",
+  "version": "0.1.0",
+  "description": "サンプルプラグイン - register(app_api) を提供します"
+}
