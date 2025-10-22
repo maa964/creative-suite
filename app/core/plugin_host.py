@@ -3,6 +3,8 @@ import importlib
 import logging
 import json
 import traceback
+import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, Any
 
@@ -33,6 +35,22 @@ class PluginHost:
         mod = importlib.import_module(module_path)
         func = getattr(mod, callable_name)
         return func
+
+    def _run_plugin_subprocess(self, plugin_dir: Path):
+        """サンドボックスで register を呼び出す"""
+        cmd = [sys.executable, str(Path(__file__).parent / "plugin_register_runner.py"), str(plugin_dir)]
+        try:
+            completed = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            stdout = completed.stdout.strip()
+            try:
+                data = json.loads(stdout)
+            except Exception:
+                data = {"ok": False, "error": "invalid JSON output", "raw": stdout}
+            return data
+        except subprocess.TimeoutExpired:
+            return {"ok": False, "error": "timeout expired"}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
 
     def register_all(self, timeout_seconds: int = 30):
         """Scan plugins_root, attempt to register each plugin.
