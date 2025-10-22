@@ -7,12 +7,15 @@ on:
       - 'plugins/**'
       - 'tests/**'
       - 'pyproject.toml'
+      - 'poetry.lock'        # <-- 追加
   pull_request:
     paths:
       - 'app/**'
       - 'plugins/**'
       - 'tests/**'
       - 'pyproject.toml'
+      - 'poetry.lock'        # <-- 追加
+  workflow_dispatch:        # <-- 手動実行を許可
 
 jobs:
   smoke-test:
@@ -50,6 +53,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install poetry
+
+      - name: Ensure poetry.lock matches pyproject
+        run: |
+          poetry lock --no-update || true
+          if poetry check 2>&1 | grep -q 'pyproject.toml changed'; then
+            echo "Regenerating poetry.lock to match pyproject.toml"
+            poetry lock
+          fi
 
       - name: Install dependencies
         run: |
