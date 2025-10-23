@@ -1,35 +1,21 @@
-# CreativeStudio Prototype (Git-ready scaffold)
+    CreativeStudio - Permission UI & PolicyManager scaffold
 
-商用化を視野に入れた「Adobe Suite + CLIP STUDIO 互換 統合アプリ」の最小プロトタイプリポジトリ雛形です。
+    Files included:
 
-## 目的
-- PySide6 ベースの最小ランチャー（UI）を提供。
-- プラグインスキャンの仕組み・サンプルプラグインを含む。
-- 商用配布前のライセンスチェックを行いやすい構成にしています。
+    - app/ui/plugin_permissions.py : PySide6-based permissions UI widget
+    - app/core/policy_manager.py : Policy to docker args builder with path normalization
+    - config/policies.json : sample policy file
 
-## 使い方（ローカルで動かす）
-```bash
-python -m venv .venv
-. .venv/bin/activate      # Windows: .\.venv\Scripts\activate
-pip install -r requirements.txt || pip install PySide6
-python -m app.ui.main
-```
+Usage:
+- From your main app, you can open the widget with:
+    from app.ui.plugin_permissions import PluginPermissionsWidget
+    w = PluginPermissionsWidget(['sample_plugin','sample_plugin_ai'])
+    w.show()
 
-## 構成
-- `app/ui/main.py` : 起動用の最小アプリ（エラーハンドリングあり）
-- `plugins/sample_plugin` : サンプルプラグイン（plugin.json + register 関数）
-- `pyproject.toml` : パッケージ設定
-- `LICENSE` : MIT ライセンス（ひな形）
+- PolicyManager.build_docker_args(plugin_dir, policy, out_dir) returns a list of docker args (without 'docker run')
 
-## ライセンスと商用メモ
-このリポジトリは MIT ライセンスで配布しています。ただし実際に外部 OSS を組み込む際は、各ライブラリのライセンス条件（特に GPL / LGPL 等）を法務で確認してください。
+Security notes:
+- Adjust SAFE_BASE_DIRS in policy_manager.py to match allowed host paths for your deployment.
+- Always validate and audit policies before granting GPU/network access.
 
-## 備考
-- この雛形には `use context7` を含めています（要望に基づくメモ）。
-
----
-Generated for masahiro — enjoy building! 🎨
-
-
-
-
+Generated for masahiro.
