@@ -1,0 +1,7 @@
+--- a/app/core/plugin_host.py
++++ b/app/core/plugin_host.py
+@@
++    # call container-based registration here
++    from plugin_container import run_in_container
++    data = run_in_container(plugin_dir)
++    self.registered[plugin_dir.name] = data

@@ -1,0 +1,10 @@
+FROM python:3.12-slim
+
+RUN useradd -m -u 1000 csuser
+WORKDIR /app
+
+COPY plugin_register_runner.py /app/plugin_register_runner.py
+RUN chown -R csuser:csuser /app && chmod +x /app/plugin_register_runner.py
+
+USER csuser
+ENTRYPOINT ["python", "/app/plugin_register_runner.py"]
