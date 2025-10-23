@@ -1,4 +1,4 @@
-# このファイルを各プラグイン subprocess で呼び出す
+#!/usr/bin/env python3
 import sys
 import json
 from pathlib import Path
@@ -19,19 +19,26 @@ def main():
         entry = manifest.get("entry")
         if not entry:
             raise ValueError("entry not specified")
-        module_path, callable_name = entry.split(":")
+        if ':' not in entry:
+            raise ValueError("entry must be module:callable")
+        module_path, callable_name = entry.split(":",1)
         mod = importlib.import_module(module_path)
         func = getattr(mod, callable_name)
-        app_api = {"name": "sandbox"}  # minimal API for subprocess
+        app_api = {"name": "sandbox"}
         result = None
-        if hasattr(func, "register"):
+        # support module object with register or callable function
+        if hasattr(func, 'register'):
             result = func.register(app_api)
         elif callable(func):
-            result = func(app_api)
+            # try calling with app_api, fallback to no-arg call
+            try:
+                result = func(app_api)
+            except TypeError:
+                result = func()
         output = {"ok": True, "manifest": result if isinstance(result, dict) else None}
     except Exception as e:
         output = {"ok": False, "error": str(e), "traceback": traceback.format_exc()}
     print(json.dumps(output))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
