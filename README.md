@@ -25,3 +25,11 @@ Signing CLI (admin):
 
 Security notes:
  - This is a prototype. In production, run behind HTTPS, require auth for approve, and use HSM/secure key storage.
+
+
+Authentication:
+- Use /token endpoint to get OAuth2 token. Default demo user: admin/password
+- Or use X-API-Key header with the server's API key (written to server/app/keys/api_key.txt)
+
+
+Security scan: upload endpoint now runs static scanner. See server/app/security_scan.py

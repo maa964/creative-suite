@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "username": "admin",
+    "full_name": "Administrator",
+    "hashed_password": "",
+    "scopes": [
+      "admin"
+    ]
+  }
+}
