@@ -1,9 +1,10 @@
 # server/app/main.py
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Security
+from fastapi.templating import Jinja2Templates
 from pathlib import Path
 import shutil, json, hashlib, os
 from . import models, signing_utils
@@ -23,6 +24,8 @@ from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 
 app = FastAPI(title="CreativeStudio Plugin Store (prototype)")
+
+templates = Jinja2Templates(directory="server/app/templates")
 
 app.add_middleware(
     CORSMiddleware,
@@ -140,3 +143,28 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user["username"], "scopes": user.get("scopes", [])}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
+
+# Dashboard一覧
+@app.get("/dashboard")
+async def dashboard(request: Request, user = Depends(require_scope("admin"))):
+    # 仮：アップロード済みプラグイン情報を取得（DBまたは JSON）
+    plugins = []  # [{'name':'plugin1','version':'0.1','uploaded_by':'admin','scan_ok':True,'scan_report':{}}]
+    return templates.TemplateResponse("dashboard.html", {"request": request, "plugins": plugins})
+
+# プラグイン詳細レビュー
+@app.get("/plugin/{name}/{version}")
+async def plugin_detail(request: Request, name: str, version: str, user = Depends(require_scope("admin"))):
+    # DB または JSON からプラグイン情報取得
+    plugin = {}  # {'name': name, 'version': version, 'uploaded_by':'admin', 'scan_ok':True,'scan_report':{}}
+    return templates.TemplateResponse("plugin_detail.html", {"request": request, "plugin": plugin})
+
+# Approve/Reject アクション
+@app.post("/plugin/{name}/{version}/approve")
+async def approve_plugin_ui(name: str, version: str, user = Depends(require_scope("admin"))):
+    # DB更新 or JSON更新で approved=True
+    return {"ok": True, "msg": f"{name} {version} approved"}
+
+@app.post("/plugin/{name}/{version}/reject")
+async def reject_plugin_ui(name: str, version: str, user = Depends(require_scope("admin"))):
+    # DB更新 or JSON更新で approved=False
+    return {"ok": True, "msg": f"{name} {version} rejected"}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plugin Store Dashboard</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body class="p-4">
+<h1>Plugin Store Dashboard</h1>
+
+<table class="table table-bordered table-hover">
+<thead>
+<tr>
+<th>Name</th><th>Version</th><th>Uploaded By</th><th>Scan Status</th><th>Actions</th>
+</tr>
+</thead>
+<tbody>
+{% for plugin in plugins %}
+<tr>
+<td>{{ plugin.name }}</td>
+<td>{{ plugin.version }}</td>
+<td>{{ plugin.uploaded_by }}</td>
+<td>
+{% if plugin.scan_ok %}
+  <span class="text-success">OK</span>
+{% else %}
+  <span class="text-danger">Issues</span>
+{% endif %}
+</td>
+<td>
+{% if plugin.scan_ok %}
+  <a href="/plugin/{{ plugin.name }}/{{ plugin.version }}" class="btn btn-sm btn-primary">Review</a>
+{% else %}
+  <span class="text-muted">Blocked</span>
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</body>
+</html>
