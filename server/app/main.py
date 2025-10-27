@@ -27,6 +27,10 @@ app = FastAPI(title="CreativeStudio Plugin Store (prototype)")
 
 templates = Jinja2Templates(directory="server/app/templates")
 
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the CreativeStudio Plugin Store API"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -127,13 +131,6 @@ def get_manifest(name: str, version: str):
             return json.loads((pkg_dir / "manifest.json").read_text(encoding="utf-8"))
     raise HTTPException(status_code=404, detail="plugin not found")
 
-@app.post("/token")
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = auth.authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Incorrect username or password")
-    token = auth.create_token(user['username'], user.get('scopes', []), expires_minutes=60)
-    return {"access_token": token, "token_type": "bearer"}
 @app.post("/token")
 async def token(form_data: OAuth2PasswordRequestForm = Depends()):
     """OAuth2 password grant token endpoint"""

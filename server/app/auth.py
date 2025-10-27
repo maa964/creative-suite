@@ -18,6 +18,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 # API key header name
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+API_KEY_HEADER = api_key_header
 
 USERS_DB_PATH = Path(__file__).resolve().parents[1] / "users_db.json"
 

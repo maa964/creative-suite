@@ -1,5 +1,3 @@
-# CreativeStudio - プラグインベース画像編集プラットフォーム（プロトタイプ）
-
 CreativeStudioは、プラグインアーキテクチャを採用した拡張可能な画像編集アプリケーションのプロトタイプです。
 PySide6ベースのGUIアプリケーション、FastAPIによるプラグインストアサーバー、そしてセキュアなプラグイン実行環境を提供します。
 
@@ -173,10 +171,10 @@ cd plugins/my_plugin
 
 ```json
 {
-  "name": "my_plugin",
-  "entry": "plugins.my_plugin.plugin:register",
-  "version": "1.0.0",
-  "description": "私のカスタムプラグイン"
+  \"name\": \"my_plugin\",
+  \"entry\": \"plugins.my_plugin.plugin:register\",
+  \"version\": \"1.0.0\",
+  \"description\": \"私のカスタムプラグイン\"
 }
 ```
 
@@ -184,13 +182,13 @@ cd plugins/my_plugin
 
 ```python
 def register(app_api=None):
-    """
+    \"\"\"
     プラグイン登録関数
     
     Args:
         app_api: ホストアプリケーションのAPI辞書
-    """
-    print(f"[my_plugin] 登録完了: {app_api}")
+    \"\"\"
+    print(f\"[my_plugin] 登録完了: {app_api}\")
     
     # ここにプラグインの初期化コードを記述
     # 例: UIコンポーネントの追加、メニュー項目の登録など
@@ -202,15 +200,15 @@ def register(app_api=None):
 
 ```json
 {
-  "my_plugin": {
-    "network": false,          # ネットワークアクセス許可
-    "gpu": false,              # GPU使用許可
-    "memory_mb": 512,          # メモリ上限（MB）
-    "cpus": 1.0,               # CPU使用率上限
-    "pids_limit": 64,          # プロセス数上限
-    "timeout_sec": 30,         # タイムアウト（秒）
-    "allowed_paths": [],       # 読み取り許可パス
-    "write_paths": []          # 書き込み許可パス
+  \"my_plugin\": {
+    \"network\": false,          # ネットワークアクセス許可
+    \"gpu\": false,              # GPU使用許可
+    \"memory_mb\": 512,          # メモリ上限（MB）
+    \"cpus\": 1.0,               # CPU使用率上限
+    \"pids_limit\": 64,          # プロセス数上限
+    \"timeout_sec\": 30,         # タイムアウト（秒）
+    \"allowed_paths\": [],       # 読み取り許可パス
+    \"write_paths\": []          # 書き込み許可パス
   }
 }
 ```
@@ -224,16 +222,16 @@ def register(app_api=None):
 tar -czf my_plugin.tar.gz -C plugins/my_plugin .
 
 # 2. ストアサーバーへアップロード
-curl -X POST "http://localhost:8001/plugins/upload" \
-  -F "manifest=@plugins/my_plugin/plugin.json" \
-  -F "package=@my_plugin.tar.gz"
+curl -X POST \"http://localhost:8001/plugins/upload\" \\
+  -F \"manifest=@plugins/my_plugin/plugin.json\" \\
+  -F \"package=@my_plugin.tar.gz\"
 
 # 3. 承認（管理者のみ）
-curl -X POST "http://localhost:8001/plugins/my_plugin/1.0.0/approve" \
-  -H "X-API-Key: YOUR_API_KEY"
+curl -X POST \"http://localhost:8001/plugins/my_plugin/1.0.0/approve\" \\
+  -H \"X-API-Key: YOUR_API_KEY\"
 
 # 4. ダウンロード
-curl -O "http://localhost:8001/plugins/my_plugin/1.0.0/download"
+curl -O \"http://localhost:8001/plugins/my_plugin/1.0.0/download\"
 ```
 
 ### マニフェストへの署名（管理者用）
@@ -251,15 +249,15 @@ python cli/sign.py plugins/my_plugin/plugin.json
 #### OAuth2 トークン取得
 
 ```bash
-curl -X POST "http://localhost:8001/token" \
-  -d "username=admin&password=password"
+curl -X POST \"http://localhost:8001/token\" \\
+  -d \"username=admin&password=password\"
 ```
 
 レスポンス：
 ```json
 {
-  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-  "token_type": "bearer"
+  \"access_token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...\",
+  \"token_type\": \"bearer\"
 }
 ```
 
@@ -267,8 +265,8 @@ curl -X POST "http://localhost:8001/token" \
 
 ```bash
 # server/app/keys/api_key.txt からキーを取得
-curl -H "X-API-Key: YOUR_API_KEY" \
-  "http://localhost:8001/plugins"
+curl -H \"X-API-Key: YOUR_API_KEY\" \\
+  \"http://localhost:8001/plugins\"
 ```
 
 ### プラグインエンドポイント
@@ -352,8 +350,8 @@ rm server/app/keys/api_key.txt
 # サーバー再起動で自動生成
 
 # トークンの再取得
-curl -X POST "http://localhost:8001/token" \
-  -d "username=admin&password=password"
+curl -X POST \"http://localhost:8001/token\" \\
+  -d \"username=admin&password=password\"
 ```
 
 ## 開発ロードマップ
@@ -409,3 +407,5 @@ ruff check --fix .
 **注意**: これはプロトタイプ版です。本番環境での使用は推奨されません。セキュリティ要件を満たすには追加の実装が必要です。
 
 **最終更新**: 2025年10月
+`
+}
