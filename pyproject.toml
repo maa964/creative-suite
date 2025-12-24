@@ -1,6 +1,6 @@
 [project]
 name = "creativestudio-proto"
-version = "0.1.0"
+version = "0.5.0"
 description = "CreativeStudio prototype - minimal launcher and plugin scaffold"
 authors = [
   { name="masahiro", email="masahiro@example.com" },
