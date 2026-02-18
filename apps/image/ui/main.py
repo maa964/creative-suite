@@ -6,15 +6,13 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QLabel
 from PySide6.QtCore import Qt
 
-from app.core.plugin_host import PluginHost  # 追加
+from apps.image.core.plugin_host import PluginHost
+from apps.core.logging import setup_logging  # 追加
 
-LOG = logging.getLogger("creative")
-LOG.setLevel(logging.DEBUG)
-handler = logging.FileHandler("app.log", encoding="utf-8")
-handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
-LOG.addHandler(handler)
+# Use common logging setup
+LOG = setup_logging("image_editor")
 
-APP_ROOT = Path(__file__).resolve().parents[2]
+APP_ROOT = Path(__file__).resolve().parents[3]
 
 def safe_load_plugins(plugin_dir: Path):
     plugins = []
@@ -37,11 +35,16 @@ def safe_load_plugins(plugin_dir: Path):
         LOG.exception("plugin scanning failed: %s", e)
     return plugins
 
+from PySide6.QtGui import QAction, QKeySequence
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("CreativeStudio Prototype")
         self.setMinimumSize(900, 600)
+        
+        self.setup_menu()
+
         try:
             self.label = QLabel("Welcome to CreativeStudio (Prototype)\nplugins will be listed in app.log", alignment=Qt.AlignCenter)
             self.setCentralWidget(self.label)
@@ -59,6 +62,27 @@ class MainWindow(QMainWindow):
         except Exception as e:
             LOG.exception("UI init failed: %s", e)
             QMessageBox.critical(self, "初期化エラー", f"UIの初期化に失敗しました:\n{e}")
+
+    def setup_menu(self):
+        menu_bar = self.menuBar()
+        
+        # File Menu
+        file_menu = menu_bar.addMenu("&File")
+        
+        exit_action = QAction("E&xit", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+        
+        # Help Menu
+        help_menu = menu_bar.addMenu("&Help")
+        about_action = QAction("&About", self)
+        about_action.triggered.connect(self.on_about)
+        help_menu.addAction(about_action)
+
+    def on_about(self):
+        QMessageBox.about(self, "About CreativeStudio",
+                          "CreativeStudio (Photo & Paint)\n\nPart of Creative Suite v0.50")
 
 def main():
     try:

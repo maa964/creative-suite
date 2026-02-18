@@ -1,0 +1,22 @@
+# Task Checklist - Extract Common Components
+
+- [x] `apps/common/theme.py` の作成
+  - `apply_dark_theme` 関数
+  - カラーパレット定数
+- [x] `apps/core/logging.py` の作成
+  - `setup_logging` 関数
+  - ロガー設定
+- [x] `apps/core/config.py` の作成
+  - `ConfigManager` クラス
+  - 設定の読み書き (JSON)
+- [x] `launcher/main.py` の修正
+  - テーマ適用コード削除 -> `apply_dark_theme`
+  - ログ設定 -> `setup_logging`
+- [x] `apps/common/base_window.py` の修正
+  - テーマ適用コード削除 -> (呼び出し側に委譲)
+  - `ConfigManager` の利用 (Optional - 今回はスキップ)
+- [x] `apps/image/ui/main.py` の修正
+  - ログ設定 -> `setup_logging`
+- [x] 検証
+  - `tools/verify_suite.py` の実行
+  - ランチャー起動テスト

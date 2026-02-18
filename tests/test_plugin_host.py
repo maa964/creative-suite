@@ -1,5 +1,5 @@
 from pathlib import Path
-from app.core.plugin_host import PluginHost
+from apps.image.core.plugin_host import PluginHost
 
 def test_pluginhost_registers_plugins():
     repo_root = Path(__file__).resolve().parents[1]
