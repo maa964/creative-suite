@@ -1,28 +1,36 @@
-from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
-                             QGraphicsView, QGraphicsScene, QToolBar, QStatusBar)
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QIcon, QColor, QPalette, QBrush, QPen
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, 
+                             QGraphicsView, QGraphicsScene, QToolBar, QStatusBar, QFileDialog)
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction, QIcon, QColor, QPalette, QBrush, QPen, QPainter
+from enum import Enum, auto
 
-class VectorEditorWindow(QMainWindow):
+# Import BaseMainWindow dynamically if needed, but relative import preferred if package structure allows
+try:
+    from apps.common.base_window import BaseMainWindow
+except ImportError:
+    import sys
+    import os
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+    from apps.common.base_window import BaseMainWindow
+
+class EditorMode(Enum):
+    SELECT = auto()
+    NODE = auto()
+    PEN = auto()
+    RECT = auto()
+    CIRCLE = auto()
+
+class VectorEditorWindow(BaseMainWindow):
+    mode_changed = Signal(EditorMode)
+
     def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Creative Suite - Vector Editor")
-        self.resize(1200, 800)
+        super().__init__(title="Creative Suite - Vector Editor")
         
-        # Theme
-        palette = QPalette()
-        palette.setColor(QPalette.Window, QColor("#2d2d2d"))
-        palette.setColor(QPalette.WindowText, Qt.white)
-        self.setPalette(palette)
+        # Current Mode
+        self.current_mode = EditorMode.SELECT
         
         # Toolbar
-        toolbar = QToolBar("Tools")
-        self.addToolBar(Qt.LeftToolBarArea, toolbar)
-        toolbar.addAction("Select")
-        toolbar.addAction("Node")
-        toolbar.addAction("Pen")
-        toolbar.addAction("Rect")
-        toolbar.addAction("Circle")
+        self.setup_toolbar()
         
         # Main Canvas Area
         self.scene = QGraphicsScene()
@@ -34,25 +42,59 @@ class VectorEditorWindow(QMainWindow):
         self.scene.addEllipse(300, 200, 100, 100, QPen(Qt.blue), QBrush(Qt.yellow))
         
         self.view = QGraphicsView(self.scene)
-        self.view.setRenderHint(self.view.renderHints() | 0x1) # Antialiasing (QPainter.Antialiasing is 0x01)
+        self.view.setRenderHint(QPainter.Antialiasing, True)
         self.view.setDragMode(QGraphicsView.RubberBandDrag)
         
         self.setCentralWidget(self.view)
         
-        # Properties Panel
-        dock = QWidget()
-        dock.setFixedWidth(250)
-        dock.setStyleSheet("background-color: #252525; border-left: 1px solid #3d3d3d;")
-        # (We would add property widgets here)
-        
-        # We need a layout helper to put dock on right if we want, 
-        # but QMainWindow has DockWidgets. For simplicity let's stick to simple central widget for now
-        # OR add a DockWidget properly.
+        # Properties Dock
         from PySide6.QtWidgets import QDockWidget, QLabel
         prop_dock = QDockWidget("Properties", self)
+        prop_dock.setAllowedAreas(Qt.RightDockWidgetArea | Qt.LeftDockWidgetArea)
         prop_dock.setWidget(QLabel("Properties Panel\n(Fill, Stroke, etc.)"))
         self.addDockWidget(Qt.RightDockWidgetArea, prop_dock)
 
-        self.statusBar = QStatusBar()
-        self.setStatusBar(self.statusBar)
-        self.statusBar.showMessage("Ready")
+        self.status_bar.showMessage(f"Mode: {self.current_mode.name}")
+
+    def setup_toolbar(self):
+        toolbar = QToolBar("Tools")
+        self.addToolBar(Qt.LeftToolBarArea, toolbar)
+        
+        actions = [
+            ("Select", EditorMode.SELECT),
+            ("Node", EditorMode.NODE),
+            ("Pen", EditorMode.PEN),
+            ("Rect", EditorMode.RECT),
+            ("Circle", EditorMode.CIRCLE),
+        ]
+        
+        for name, mode in actions:
+            action = QAction(name, self)
+            action.setCheckable(True)
+            if mode == self.current_mode:
+                action.setChecked(True)
+            # Use a lambda to capture the mode correctly
+            action.triggered.connect(lambda checked=False, m=mode: self.set_mode(m))
+            toolbar.addAction(action)
+            
+            # Grouping for exclusive check behavior would be good here (QActionGroup)
+            
+    def set_mode(self, mode):
+        self.current_mode = mode
+        self.status_bar.showMessage(f"Mode: {mode.name}")
+        
+        if mode == EditorMode.SELECT:
+            self.view.setDragMode(QGraphicsView.RubberBandDrag)
+        else:
+            self.view.setDragMode(QGraphicsView.NoDrag)
+            
+    def on_open_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open SVG", "", "SVG Files (*.svg);;All Files (*)")
+        if file_path:
+            self.status_bar.showMessage(f"Opened SVG: {file_path}")
+            # Stub: Implement SVG loading logic here
+
+    def on_save_file(self):
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save SVG", "", "SVG Files (*.svg)")
+        if file_path:
+            self.status_bar.showMessage(f"Saved SVG to: {file_path}")

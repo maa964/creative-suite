@@ -1,12 +1,18 @@
 import sys
 import os
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QHBoxLayout, QPushButton, QLabel, QFrame, QGridLayout)
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QFont, QIcon, QColor, QPalette
+                             QHBoxLayout, QPushButton, QLabel)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont, QColor, QPalette
 
 # Ensure the root directory is in sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+try:
+    from apps.core.logging import setup_logging
+    from apps.common.theme import apply_dark_theme
+except ImportError:
+    pass
 
 class LauncherButton(QPushButton):
     def __init__(self, title, description, color, icon_text, callback):
@@ -69,7 +75,7 @@ class CreativeSuiteLauncher(QMainWindow):
         self.setMinimumSize(900, 600)
         
         # Setup Dark Theme
-        self.setup_theme()
+        apply_dark_theme(QApplication.instance())
         
         # Central Widget
         central_widget = QWidget()
@@ -140,21 +146,13 @@ class CreativeSuiteLauncher(QMainWindow):
         footer.setAlignment(Qt.AlignCenter)
         footer.setStyleSheet("color: #444444;")
         main_layout.addWidget(footer)
-
-    def setup_theme(self):
-        palette = QPalette()
-        palette.setColor(QPalette.Window, QColor("#1e1e1e"))
-        palette.setColor(QPalette.WindowText, Qt.white)
-        self.setPalette(palette)
-
+        
     def launch_image_editor(self):
         print("Launching Image Editor...")
         try:
-            # We need to import here to avoid circular dependencies or early init issues
-            from app.ui.main import MainWindow as ImageEditorWindow
+            from apps.image.ui.main import MainWindow as ImageEditorWindow
             self.image_window = ImageEditorWindow()
             self.image_window.show()
-            # self.close() # Keep launcher open? Or close? Let's keep open for now or minimize.
         except Exception as e:
             print(f"Error launching Image Editor: {e}")
             import traceback
@@ -184,8 +182,14 @@ class CreativeSuiteLauncher(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
     
+    # Use common logging
+    try:
+        from apps.core.logging import setup_logging
+        setup_logging("launcher")
+    except ImportError:
+        print("Could not import setup_logging")
+
     window = CreativeSuiteLauncher()
     window.show()
     
