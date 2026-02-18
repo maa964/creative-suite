@@ -1,0 +1,22 @@
+# Task Checklist - Refactor Image Editor Structure
+
+- [x] ディレクトリ作成: `apps/image/`
+- [x] ファイル移動: `app/` -> `apps/image/`
+  - `app/core` -> `apps/image/core`
+  - `app/ui` -> `apps/image/ui`
+  - `app/ipc` -> `apps/image/ipc`
+  - `app/__init__.py` -> `apps/image/__init__.py`
+- [x] コード修正: `apps/image/ui/main.py`
+  - `APP_ROOT` 設定
+  - インポートパス (`from app.` -> `from apps.image.`)
+- [x] コード修正: `apps/image/core` 以下
+  - インポートパス (`from app.` -> `from apps.image.`)
+- [x] コード修正: `launcher/main.py`
+  - インポートパス (`from app.` -> `from apps.image.`)
+- [x] コード修正: `tools/verify_suite.py`
+  - インポートパス
+- [x] テストスクリプト修正: `tests/test_plugin_host.py`
+- [x] 検証:
+  - 自動テスト (`tools/verify_suite.py`)
+  - ランチャーからの手動起動
+- [x] クリーンアップ: 旧 `app/` ディレクトリ削除

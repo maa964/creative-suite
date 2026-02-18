@@ -1,0 +1,21 @@
+# Task Checklist - UI Implementation and Unification
+
+- [x] `apps/common/base_window.py` の実装
+  - `BaseMainWindow` クラスの定義
+  - 共通メニューバー (New, Open, Save, Exit, Help)
+  - 共通スタイル設定
+- [x] `apps/vector/main.py` の改修
+  - `BaseMainWindow` を継承に変更
+  - 列挙型 `EditorMode` の追加
+  - ツールバーイベントハンドラの実装 (モード切替)
+  - ファイル I/O スタブの実装
+- [x] `apps/video/main.py` の改修
+  - `BaseMainWindow` を継承に変更
+  - `QSplitter` を導入したレイアウト調整
+  - 再生コントロールのトグル動作実装
+  - ファイル I/O スタブの実装
+- [x] `app/ui/main.py` の調整
+  - 既存 `MainWindow` にメニューバーを追加
+- [x] 検証
+  - `launcher/main.py` で統合動作確認
+  - [x] 自動スモークテスト (`tools/verify_suite.py`) パス確認済み
