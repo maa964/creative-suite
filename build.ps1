@@ -20,7 +20,7 @@ Write-Host "`n[3/4] Linting..." -ForegroundColor Yellow
 try {
     $ruffVersion = poetry run python -m ruff --version 2>$null
     if ($LASTEXITCODE -eq 0) {
-        poetry run python -m ruff check apps/ launcher/
+        poetry run python -m ruff check apps/ launcher/ server/ engine/
         if ($LASTEXITCODE -ne 0) { Write-Warning "Lint warnings found" }
     }
     else {
