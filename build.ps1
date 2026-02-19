@@ -17,17 +17,30 @@ if ($LASTEXITCODE -ne 0) { Write-Error "Tests failed"; exit 1 }
 
 # 3. Lint (optional - runs if ruff is available)
 Write-Host "`n[3/4] Linting..." -ForegroundColor Yellow
-$ruffAvailable = poetry run python -m ruff --version 2>$null
-if ($LASTEXITCODE -eq 0) {
-    poetry run python -m ruff check apps/ launcher/
-    if ($LASTEXITCODE -ne 0) { Write-Warning "Lint warnings found" }
-} else {
-    Write-Host "  ruff not installed, skipping lint" -ForegroundColor DarkGray
+try {
+    $ruffVersion = poetry run python -m ruff --version 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        poetry run python -m ruff check apps/ launcher/
+        if ($LASTEXITCODE -ne 0) { Write-Warning "Lint warnings found" }
+    }
+    else {
+        Write-Host "  ruff not installed, skipping lint" -ForegroundColor DarkGray
+    }
+}
+catch {
+    Write-Host "  ruff check encountered an error, skipping lint" -ForegroundColor DarkGray
 }
 
 # 4. Build package
 Write-Host "`n[4/4] Building package..." -ForegroundColor Yellow
-poetry build
-if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
+# Check if package-mode is false in pyproject.toml
+$isNonPackage = Select-String -Path "pyproject.toml" -Pattern "package-mode\s*=\s*false"
+if ($isNonPackage) {
+    Write-Host "  package-mode is false, skipping poetry build" -ForegroundColor DarkGray
+}
+else {
+    poetry build
+    if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
+}
 
 Write-Host "`n=== Build complete ===" -ForegroundColor Green
