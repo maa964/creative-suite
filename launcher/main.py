@@ -72,7 +72,7 @@ class CreativeSuiteLauncher(QMainWindow):
         super().__init__()
         
         self.setWindowTitle("Creative Suite Hub")
-        self.setMinimumSize(900, 600)
+        self.setMinimumSize(1100, 600)
         
         # Setup Dark Theme
         apply_dark_theme(QApplication.instance())
@@ -118,7 +118,7 @@ class CreativeSuiteLauncher(QMainWindow):
         # Video Editor Button
         self.btn_video = LauncherButton(
             "Video Editor",
-            "Pro-level Video Editing & Sequencing\n(MLT + Timeline)",
+            "Pro-level Video Editing & Sequencing\n(QtMultimedia + Timeline)",
             "#9b59b6", # Purple
             "🎬",
             self.launch_video_editor
@@ -133,16 +133,26 @@ class CreativeSuiteLauncher(QMainWindow):
             self.launch_vector_editor
         )
         
+        # AI Studio Button
+        self.btn_ai = LauncherButton(
+            "AI Studio",
+            "AI-Powered Creative Tools\n(Stable Diffusion + Whisper)",
+            "#2ecc71", # Green
+            "\U0001f916",
+            self.launch_ai_studio
+        )
+
         grid_layout.addWidget(self.btn_image)
         grid_layout.addWidget(self.btn_video)
         grid_layout.addWidget(self.btn_vector)
+        grid_layout.addWidget(self.btn_ai)
         
         main_layout.addStretch()
         main_layout.addLayout(grid_layout)
         main_layout.addStretch()
         
         # Footer
-        footer = QLabel("v0.2.0-alpha • Powered by Python & Qt")
+        footer = QLabel("v0.7.0 • Powered by Python & Qt")
         footer.setAlignment(Qt.AlignCenter)
         footer.setStyleSheet("color: #444444;")
         main_layout.addWidget(footer)
@@ -177,6 +187,17 @@ class CreativeSuiteLauncher(QMainWindow):
             self.vector_window.show()
         except Exception as e:
             print(f"Error launching Vector Editor: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def launch_ai_studio(self):
+        print("Launching AI Studio...")
+        try:
+            from apps.ai.main import AIStudioWindow
+            self.ai_window = AIStudioWindow()
+            self.ai_window.show()
+        except Exception as e:
+            print(f"Error launching AI Studio: {e}")
             import traceback
             traceback.print_exc()
 

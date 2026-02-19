@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: .gitignoreファイルを追加し、IDE設定と一時ファイルを除外\n\n- IDE/エディタ設定 \\(.claude/, .cursor/, .vscode/, .obsidian/\\) を除外\n- プロジェクトローカルディレクトリ \\(langfuse_integration/, magi_system/, reports/\\) を除外\n- 一時ファイル \\(temp_*.js\\) を除外\n- claude.md と docs/ を追跡対象として追加\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(dir:*)",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(cmd //c \"mklink /J .claude\\\\skills skills\")",
+      "Bash(cmd //c \"mklink /J .gemini\\\\skills skills\")",
+      "Bash(python -m pytest:*)",
+      "Bash(findstr:*)",
+      "Bash(Select-String -Pattern \"<<<<<<<|=======|>>>>>>>\")",
+      "Bash(poetry run pytest:*)",
+      "Bash(poetry env:*)",
+      "Bash(.venvScriptspython.exe -m pytest tests/test_video_models.py tests/test_vector_models.py tests/test_svg_io.py tests/test_video_editor_smoke.py tests/test_vector_editor_smoke.py -v)",
+      "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\python.exe\" -m pytest tests/test_video_models.py tests/test_vector_models.py tests/test_svg_io.py tests/test_video_editor_smoke.py tests/test_vector_editor_smoke.py -v)",
+      "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\pip.exe\" install pytest)",
+      "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\python.exe\" -m pytest tests/ -v)"
+    ]
+  }
+}
