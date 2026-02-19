@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends
 from pathlib import Path
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .auth import get_current_user_from_token, require_scope
 from .plugins import load_meta, STORAGE
@@ -96,7 +96,7 @@ async def health_check():
     """Health check endpoint for monitoring."""
     return {
         "status": "ok",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "storage_path": str(STORAGE),
         "storage_exists": STORAGE.exists()
     }

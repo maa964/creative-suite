@@ -1,6 +1,7 @@
 # server/app/main.py
 """Creative Studio Plugin Store API - Main application entry point."""
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,12 +16,20 @@ app = FastAPI(
 )
 
 # CORS middleware for cross-origin requests
+# Set CS_STORE_CORS_ORIGINS env var (comma-separated) for production
+# Example: CS_STORE_CORS_ORIGINS=https://example.com,https://app.example.com
+_cors_origins_env = os.environ.get("CS_STORE_CORS_ORIGINS", "")
+ALLOWED_ORIGINS = [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
+if not ALLOWED_ORIGINS:
+    # Default: localhost only for development
+    ALLOWED_ORIGINS = ["http://localhost:3000", "http://localhost:8080", "http://127.0.0.1:3000", "http://127.0.0.1:8080"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key"],
 )
 
 # Include routers

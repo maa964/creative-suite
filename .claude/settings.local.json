@@ -18,7 +18,8 @@
       "Bash(.venvScriptspython.exe -m pytest tests/test_video_models.py tests/test_vector_models.py tests/test_svg_io.py tests/test_video_editor_smoke.py tests/test_vector_editor_smoke.py -v)",
       "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\python.exe\" -m pytest tests/test_video_models.py tests/test_vector_models.py tests/test_svg_io.py tests/test_video_editor_smoke.py tests/test_vector_editor_smoke.py -v)",
       "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\pip.exe\" install pytest)",
-      "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\python.exe\" -m pytest tests/ -v)"
+      "Bash(\"d:\\\\Sync\\\\cursorproject\\\\creative-suite\\\\.venv\\\\Scripts\\\\python.exe\" -m pytest tests/ -v)",
+      "Bash(python -c:*)"
     ]
   }
 }
