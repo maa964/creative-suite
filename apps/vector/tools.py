@@ -35,7 +35,8 @@ class SelectTool(BaseTool):
         self._move_start_pos = QPointF()
 
     def mouse_press(self, pos: QPointF, event):
-        item = self._scene.itemAt(pos, event.widget().transform() if event.widget() else __import__('PySide6.QtGui', fromlist=['QTransform']).QTransform())
+        from PySide6.QtGui import QTransform
+        item = self._scene.itemAt(pos, QTransform())
         if item:
             self._moving_item = item
             self._move_start_pos = item.pos()

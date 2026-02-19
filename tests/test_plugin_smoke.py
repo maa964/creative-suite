@@ -21,6 +21,6 @@ def test_colorize_job_creates_output(tmp_path):
     img = Image.new('L', (64,64), color=128)  # gray
     img.save(img_path)
 
-    res = sample_plugin_ai.plgitugin.colorize_job(str(img_path), str(out_path), method='heuristic')
+    res = sample_plugin_ai.plugin.colorize_job(str(img_path), str(out_path), method='heuristic')
     assert res.get('status') == 'ok'
     assert Path(res.get('output_path')).exists()

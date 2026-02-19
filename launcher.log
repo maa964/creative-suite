@@ -1,0 +1,4 @@
+2026-02-18 23:22:46,254 INFO [creative] loaded plugins: ['sample_plugin', 'sample_plugin_ai']
+2026-02-18 23:22:46,484 INFO [creative] plugin host registration results: {'sample_plugin': {'ok': True, 'manifest': None}, 'sample_plugin_ai': {'ok': True, 'manifest': None}}
+2026-02-19 18:29:42,759 INFO [creative] loaded plugins: ['sample_plugin', 'sample_plugin_ai']
+2026-02-19 18:29:42,987 INFO [creative] plugin host registration results: {'sample_plugin': {'ok': True, 'manifest': None}, 'sample_plugin_ai': {'ok': True, 'manifest': None}}

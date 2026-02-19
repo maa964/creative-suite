@@ -5,6 +5,7 @@ description = "Creative Suite - Open Source Creative Tools Integration Environme
 authors = [
   { name="masahiro", email="masahiro@example.com" },
 ]
+dependencies = ["pytest (>=9.0.2,<10.0.0)"]
 
 [tool.poetry]
 package-mode = false
