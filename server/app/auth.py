@@ -2,7 +2,7 @@
 from fastapi import Depends, HTTPException, status, Security, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, APIKeyHeader
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, API_KEYS
 import jwt
 import json
@@ -32,6 +32,11 @@ class TokenData(BaseModel):
     username: Optional[str] = None
     scopes: Optional[list] = []
 
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    full_name: str = ""
+
 # --- user utils (very small, file-based for prototype) ---
 def _load_users():
     if not USERS_DB_PATH.exists():
@@ -57,7 +62,7 @@ def authenticate_user(username: str, password: str):
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire.isoformat()})
     # include subject
     encoded_jwt = jwt.encode({"sub": data.get("sub"), "scopes": data.get("scopes", []), "exp": expire}, SECRET_KEY, algorithm=ALGORITHM)
@@ -125,16 +130,19 @@ async def read_users_me(current_user: dict = Depends(get_current_user_from_token
 
 
 @router.post("/register")
-async def register_user(username: str, password: str, full_name: str = ""):
-    """Register a new user (admin only in production)."""
+async def register_user(
+    request: RegisterRequest,
+    admin_user: dict = Depends(require_scope("admin"))
+):
+    """Register a new user (admin only)."""
     users = _load_users()
-    if username in users:
+    if request.username in users:
         raise HTTPException(status_code=400, detail="Username already exists")
-    users[username] = {
-        "username": username,
-        "full_name": full_name,
-        "hashed_password": pwd_context.hash(password),
+    users[request.username] = {
+        "username": request.username,
+        "full_name": request.full_name,
+        "hashed_password": pwd_context.hash(request.password),
         "scopes": []
     }
     USERS_DB_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
-    return {"ok": True, "username": username}
+    return {"ok": True, "username": request.username, "registered_by": admin_user["username"]}

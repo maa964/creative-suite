@@ -9,6 +9,7 @@ import hashlib
 
 from . import signing_utils, security_scan
 from .auth import get_current_user_from_token, require_scope
+from .config import MAX_MANIFEST_SIZE, MAX_PACKAGE_SIZE
 
 router = APIRouter(prefix="/plugins", tags=["plugins"])
 
@@ -54,15 +55,32 @@ async def upload_plugin(
     user: dict = Depends(get_current_user_from_token)
 ):
     """Upload a new plugin package."""
-    mf = json.loads(await manifest.read())
+    # Read manifest with size limit
+    manifest_data = await manifest.read(MAX_MANIFEST_SIZE + 1)
+    if len(manifest_data) > MAX_MANIFEST_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Manifest too large (max {MAX_MANIFEST_SIZE // 1024}KB)"
+        )
+
+    try:
+        mf = json.loads(manifest_data)
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid manifest JSON: {e}")
+
     name = mf.get("name")
     version = mf.get("version", "0.0.0")
 
     if not name:
         raise HTTPException(status_code=400, detail="Manifest missing 'name' field")
 
-    # Read package data
-    data = await package.read()
+    # Read package data with size limit
+    data = await package.read(MAX_PACKAGE_SIZE + 1)
+    if len(data) > MAX_PACKAGE_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Package too large (max {MAX_PACKAGE_SIZE // (1024 * 1024)}MB)"
+        )
 
     # Security scan
     ok, report = security_scan.scan_package(data)
