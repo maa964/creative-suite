@@ -1,116 +1,137 @@
-# app/ui/main.py
+
 import sys
-import json
+import os
 import logging
 from pathlib import Path
-from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QLabel
+
+from PySide6.QtWidgets import QApplication, QDockWidget, QFileDialog, QMessageBox, QLabel
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QImage, QAction
 
+# Adjust path to find 'apps' module if run directly
+if __name__ == "__main__":
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
+from apps.common.base_window import BaseMainWindow
+from apps.image.core.layer_manager import LayerManager
+from apps.image.core.canvas import ImageCanvas, ImageCanvasView
+from apps.image.ui.layer_panel import LayerPanel
 from apps.image.core.plugin_host import PluginHost
-from apps.core.logging import setup_logging  # 追加
+from apps.image.core.project_io import ProjectIO
+from apps.core.logging import setup_logging
 
-# Use common logging setup
 LOG = setup_logging("image_editor")
-
 APP_ROOT = Path(__file__).resolve().parents[3]
 
-def safe_load_plugins(plugin_dir: Path):
-    plugins = []
-    try:
-        if not plugin_dir.exists():
-            LOG.info("plugin dir not found: %s", plugin_dir)
-            return plugins
-        for p in plugin_dir.iterdir():
-            if p.is_dir() and (p / "plugin.json").exists():
-                try:
-                    cfg = json.loads((p / "plugin.json").read_text(encoding="utf-8"))
-                    # minimal validation
-                    if "name" not in cfg or "entry" not in cfg:
-                        LOG.warning("invalid plugin manifest: %s", p)
-                        continue
-                    plugins.append((p.name, cfg))
-                except Exception as e:
-                    LOG.exception("failed to load plugin %s: %s", p, e)
-    except Exception as e:
-        LOG.exception("plugin scanning failed: %s", e)
-    return plugins
-
-from PySide6.QtGui import QAction, QKeySequence
-
-class MainWindow(QMainWindow):
+class MainWindow(BaseMainWindow):
     def __init__(self):
-        super().__init__()
-        self.setWindowTitle("CreativeStudio Prototype")
-        self.setMinimumSize(900, 600)
+        super().__init__(title="Photo & Paint", width=1280, height=800)
         
-        self.setup_menu()
+        # 1. Core Logic
+        self.layer_manager = LayerManager(800, 600)
+        
+        # 2. Central Canvas View
+        self.canvas_scene = ImageCanvas(self.layer_manager)
+        self.canvas_view = ImageCanvasView(self.canvas_scene)
+        self.setCentralWidget(self.canvas_view)
+        
+        # 3. Docks
+        self.layer_panel = LayerPanel(self.layer_manager)
+        self.layer_dock = QDockWidget("Layers", self)
+        self.layer_dock.setWidget(self.layer_panel)
+        self.layer_dock.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.layer_dock)
+        
+        # 4. Plugins
+        self._init_plugins()
+        
+        self.status_bar.showMessage("Ready")
 
+    def _init_plugins(self):
         try:
-            self.label = QLabel("Welcome to CreativeStudio (Prototype)\nplugins will be listed in app.log", alignment=Qt.AlignCenter)
-            self.setCentralWidget(self.label)
-            plugins = safe_load_plugins(APP_ROOT / "plugins")
-            LOG.info("loaded plugins: %s", [p[0] for p in plugins])
-
-            # PluginHost を使って登録（ホスト側で例外吸収・ログ化）
-            try:
-                host = PluginHost(APP_ROOT / 'plugins', app_api={'name':'CreativeStudioHost'})
-                reg = host.register_all()
-                LOG.info('plugin host registration results: %s', reg)
-            except Exception as e:
-                LOG.exception('PluginHost registration error: %s', e)
-
+            plugins_dir = APP_ROOT / "plugins"
+            if plugins_dir.exists():
+                self.plugin_host = PluginHost(plugins_dir, app_api={'name': 'CreativeStudioHost'})
+                results = self.plugin_host.register_all()
+                LOG.info(f"Plugins loaded: {results}")
+                if results:
+                    self.status_bar.showMessage(f"Loaded {len(results)} plugins")
+            else:
+                LOG.warning(f"Plugins directory not found: {plugins_dir}")
         except Exception as e:
-            LOG.exception("UI init failed: %s", e)
-            QMessageBox.critical(self, "初期化エラー", f"UIの初期化に失敗しました:\n{e}")
+            LOG.exception("Failed to initialize plugins")
+            self.status_bar.showMessage("Plugin load failed")
 
-    def setup_menu(self):
-        menu_bar = self.menuBar()
+    def on_new_file(self):
+        self.layer_manager = LayerManager(800, 600)
+        self.canvas_scene = ImageCanvas(self.layer_manager)
+        self.canvas_view.setScene(self.canvas_scene)
         
-        # File Menu
-        file_menu = menu_bar.addMenu("&File")
+        # Re-create panel to bind to new manager
+        self.layer_dock.setWidget(None)
+        self.layer_panel = LayerPanel(self.layer_manager)
+        self.layer_dock.setWidget(self.layer_panel)
         
-        exit_action = QAction("E&xit", self)
-        exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
-        
-        # Help Menu
-        help_menu = menu_bar.addMenu("&Help")
-        about_action = QAction("&About", self)
-        about_action.triggered.connect(self.on_about)
-        help_menu.addAction(about_action)
+        self.status_bar.showMessage("New canvas created (800x600)")
 
-    def on_about(self):
-        QMessageBox.about(self, "About CreativeStudio",
-                          "CreativeStudio (Photo & Paint)\n\nPart of Creative Suite v0.50")
+    def on_open_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Open File", "", 
+            "Images/Projects (*.png *.jpg *.jpeg *.bmp *.svg *.webp *.csp *.json);;All Files (*)"
+        )
+        if not file_path:
+            return
+
+        if file_path.endswith(".csp") or file_path.endswith(".json"):
+            # Load Project
+            try:
+                new_manager = ProjectIO.load_project(file_path)
+                self.layer_manager = new_manager
+                self.canvas_scene = ImageCanvas(self.layer_manager)
+                self.canvas_view.setScene(self.canvas_scene)
+                
+                # Re-bind UI
+                self.layer_dock.setWidget(None)
+                self.layer_panel = LayerPanel(self.layer_manager)
+                self.layer_dock.setWidget(self.layer_panel)
+
+                self.status_bar.showMessage(f"Project loaded: {file_path}")
+            except Exception as e:
+                LOG.exception("Failed to load project")
+                QMessageBox.critical(self, "Load Error", f"Failed to load project:\n{e}")
+        else:
+            # Import Image as Layer
+            image = QImage(file_path)
+            if not image.isNull():
+                self.layer_manager.add_image_layer(image, os.path.basename(file_path))
+                self.status_bar.showMessage(f"Imported layer: {file_path}")
+            else:
+                QMessageBox.warning(self, "Error", "Failed to load image file.")
+                self.status_bar.showMessage("Open failed")
+
+    def on_save_file(self):
+        file_path, _ = QFileDialog.getSaveFileName(
+            self, "Save Project", "", 
+            "Creative Studio Project (*.csp);;JSON (*.json)"
+        )
+        if file_path:
+            try:
+                ProjectIO.save_project(self.layer_manager, file_path)
+                self.status_bar.showMessage(f"Project saved: {file_path}")
+            except Exception as e:
+                LOG.exception("Failed to save project")
+                QMessageBox.critical(self, "Save Error", f"Failed to save project:\n{e}")
+
 
 def main():
-    try:
-        app = QApplication(sys.argv)
-        mw = MainWindow()
-        mw.show()
-        sys.exit(app.exec())
-    except Exception as e:
-        LOG.exception("fatal error: %s", e)
-        # Try to display a dialog if possible, without re-importing QApplication at function scope
-        try:
-            app_instance = None
-            try:
-                app_instance = QApplication.instance()
-            except Exception:
-                app_instance = None
-
-            if 'QMessageBox' in globals() and (app_instance is not None or 'QApplication' in globals()):
-                try:
-                    QMessageBox.critical(None, "致命的エラー", f"アプリが異常終了しました:\n{e}")
-                except Exception:
-                    print("fatal (dialog failed):", e)
-            else:
-                print("fatal:", e)
-        except Exception as inner:
-            LOG.exception("failed to show fatal dialog: %s", inner)
-            print("fatal:", e)
-        sys.exit(1)
+    app = QApplication(sys.argv)
+    
+    # Apply theme/style here if needed
+    
+    window = MainWindow()
+    window.show()
+    
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()

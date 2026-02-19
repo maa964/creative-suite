@@ -55,7 +55,8 @@ class PluginHost:
             LOG.warning("plugins root not found: %s", self.plugins_root)
             return self.registered
         for p in sorted(self.plugins_root.iterdir()):
-            if not p.is_dir():
+            # Explicitly ignore __pycache__ and hidden directories
+            if not p.is_dir() or p.name == "__pycache__" or p.name.startswith(".") or p.name.startswith("__"):
                 continue
             try:
                 manifest = self._load_manifest(p)
