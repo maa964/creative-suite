@@ -44,14 +44,14 @@ class BaseMainWindow(QMainWindow):
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
         
-        # Edit Menu (Placeholder)
+        # Edit Menu
         edit_menu = menu_bar.addMenu("&Edit")
-        undo_action = QAction("&Undo", self)
-        undo_action.setShortcut(QKeySequence.Undo)
-        edit_menu.addAction(undo_action)
-        redo_action = QAction("&Redo", self)
-        redo_action.setShortcut(QKeySequence.Redo)
-        edit_menu.addAction(redo_action)
+        self._undo_action = QAction("&Undo", self)
+        self._undo_action.setShortcut(QKeySequence.Undo)
+        edit_menu.addAction(self._undo_action)
+        self._redo_action = QAction("&Redo", self)
+        self._redo_action.setShortcut(QKeySequence.Redo)
+        edit_menu.addAction(self._redo_action)
         
         # Help Menu
         help_menu = menu_bar.addMenu("&Help")
@@ -71,6 +71,19 @@ class BaseMainWindow(QMainWindow):
     def on_save_file(self):
         self.status_bar.showMessage("File Saved (Stub)")
 
+    def set_undo_stack(self, stack):
+        """Connect undo/redo menu actions to a QUndoStack."""
+        # Disconnect previous connections to prevent duplication
+        try:
+            self._undo_action.triggered.disconnect()
+            self._redo_action.triggered.disconnect()
+        except RuntimeError:
+            pass
+        self._undo_action.triggered.connect(stack.undo)
+        self._redo_action.triggered.connect(stack.redo)
+        stack.canUndoChanged.connect(self._undo_action.setEnabled)
+        stack.canRedoChanged.connect(self._redo_action.setEnabled)
+
     def on_about(self):
         QMessageBox.about(self, "About Creative Suite",
-                          "Creative Suite v0.50\n\nOpen Source Creative Tools Integration Environment")
+                          "Creative Suite v0.7.0\n\nOpen Source Creative Tools Integration Environment")

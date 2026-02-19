@@ -21,10 +21,10 @@ def normalize_paths(paths):
         allowed = False
         for base in SAFE_BASE_DIRS:
             try:
-                if str(p).startswith(str(base)):
-                    allowed = True
-                    break
-            except Exception:
+                p.relative_to(base)
+                allowed = True
+                break
+            except ValueError:
                 pass
         if not allowed:
             LOG.warning("path %s is not within allowed bases, skipping", p)

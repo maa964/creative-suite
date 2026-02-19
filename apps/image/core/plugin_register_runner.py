@@ -2,7 +2,13 @@ import os, sys, json
 from pathlib import Path
 
 def main():
-    plugin_dir = Path(sys.argv[1])
+    if len(sys.argv) < 2:
+        print(json.dumps({"ok": False, "error": "plugin_dir argument required"}))
+        return
+    plugin_dir = Path(sys.argv[1]).resolve()
+    if not plugin_dir.is_dir():
+        print(json.dumps({"ok": False, "error": f"plugin dir not found: {plugin_dir}"}))
+        return
     out_dir = Path(os.getenv("CS_OUT_DIR", "/out"))
     result = {"ok": True, "plugin": plugin_dir.name}
     out_dir.mkdir(parents=True, exist_ok=True)
