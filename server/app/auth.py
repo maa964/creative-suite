@@ -1,5 +1,5 @@
 # server/app/auth.py
-from fastapi import Depends, HTTPException, status, Security
+from fastapi import Depends, HTTPException, status, Security, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, APIKeyHeader
 from typing import Optional
 from datetime import datetime, timedelta
@@ -9,6 +9,8 @@ import json
 from pathlib import Path
 from pydantic import BaseModel
 from passlib.context import CryptContext
+
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -96,3 +98,43 @@ async def get_api_key(api_key: str = Security(api_key_header)):
     if api_key and api_key in API_KEYS:
         return api_key
     raise HTTPException(status_code=401, detail="Invalid or missing API Key")
+
+
+# --- Router endpoints ---
+
+@router.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """Authenticate user and return JWT token."""
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = create_access_token(
+        data={"sub": user["username"], "scopes": user.get("scopes", [])}
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/me")
+async def read_users_me(current_user: dict = Depends(get_current_user_from_token)):
+    """Get current authenticated user info."""
+    return current_user
+
+
+@router.post("/register")
+async def register_user(username: str, password: str, full_name: str = ""):
+    """Register a new user (admin only in production)."""
+    users = _load_users()
+    if username in users:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    users[username] = {
+        "username": username,
+        "full_name": full_name,
+        "hashed_password": pwd_context.hash(password),
+        "scopes": []
+    }
+    USERS_DB_PATH.write_text(json.dumps(users, indent=2), encoding="utf-8")
+    return {"ok": True, "username": username}
