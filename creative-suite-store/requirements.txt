@@ -3,8 +3,3 @@ uvicorn[standard]
 python-multipart
 cryptography
 pydantic
-passlib[bcrypt]
-pyjwt
-jinja2
-python-multipart
-aiofiles

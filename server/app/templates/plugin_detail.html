@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Plugin Review - {{ plugin.name }} {{ plugin.version }}</title>
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+</head>
+<body class="p-4">
+<h2>Plugin Review: {{ plugin.name }} {{ plugin.version }}</h2>
+
+<h4>Scan Report:</h4>
+<pre>{{ plugin.scan_report | tojson(indent=2) }}</pre>
+
+<form method="post" action="/plugin/{{ plugin.name }}/{{ plugin.version }}/approve">
+  <button type="submit" class="btn btn-success">Approve</button>
+</form>
+<form method="post" action="/plugin/{{ plugin.name }}/{{ plugin.version }}/reject">
+  <button type="submit" class="btn btn-danger">Reject</button>
+</form>
+
+<a href="/dashboard" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</body>
+</html>

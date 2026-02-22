@@ -1,10 +1,11 @@
 [project]
 name = "creativestudio-proto"
-version = "0.1.0"
-description = "CreativeStudio prototype - minimal launcher and plugin scaffold"
+version = "0.7.0"
+description = "Creative Suite - Open Source Creative Tools Integration Environment"
 authors = [
   { name="masahiro", email="masahiro@example.com" },
 ]
+dependencies = ["pytest (>=9.0.2,<10.0.0)"]
 
 [tool.poetry]
 package-mode = false
@@ -14,6 +15,18 @@ python = ">=3.12,<3.13"
 PySide6 = ">6.5"
 pillow = ">=9.0"
 numpy = ">=1.23"
+defusedxml = ">=0.7.1"
+huggingface-hub = ">=0.20"
+
+[project.optional-dependencies]
+ai-local = [
+    "torch>=2.0",
+    "diffusers>=0.25",
+    "transformers>=4.36",
+    "openai-whisper>=20231117",
+    "rembg>=2.0",
+    "accelerate>=0.25",
+]
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]
