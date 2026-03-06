@@ -17,12 +17,14 @@ class VideoPreviewWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self._video_widget = QVideoWidget()
+        self._video_widget.setAspectRatioMode(Qt.KeepAspectRatio)
         self._video_widget.setMinimumSize(320, 180)
 
-        self._player = QMediaPlayer()
-        self._audio_output = QAudioOutput()
+        self._player = QMediaPlayer(self)
+        self._audio_output = QAudioOutput(self)
         self._player.setVideoOutput(self._video_widget)
         self._player.setAudioOutput(self._audio_output)
+        self._player.errorOccurred.connect(self._on_player_error)
 
         # Placeholder label (shown when no media loaded)
         self._placeholder = QLabel("Video Preview")
@@ -73,3 +75,7 @@ class VideoPreviewWidget(QWidget):
     def _on_state_changed(self, state):
         is_playing = (state == QMediaPlayer.PlaybackState.PlayingState)
         self.playback_state_changed.emit(is_playing)
+
+    def _on_player_error(self, error, error_string):
+        print(f"VideoPreview Error: {error} - {error_string}")
+

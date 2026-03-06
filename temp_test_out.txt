@@ -1,0 +1,35 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.8, pytest-7.4.3, pluggy-1.6.0
+rootdir: D:\Sync\cursorproject\creative-suite
+configfile: pytest.ini
+plugins: anyio-4.11.0
+collected 0 items / 2 errors
+
+=================================== ERRORS ====================================
+______________ ERROR collecting tests/test_video_editor_smoke.py ______________
+ImportError while importing test module 'D:\Sync\cursorproject\creative-suite\tests\test_video_editor_smoke.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\skald\AppData\Local\Programs\Python\Python310\lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_video_editor_smoke.py:4: in <module>
+    from PySide6.QtWidgets import QApplication
+E   ModuleNotFoundError: No module named 'PySide6'
+_________________ ERROR collecting tests/test_video_models.py _________________
+ImportError while importing test module 'D:\Sync\cursorproject\creative-suite\tests\test_video_models.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\skald\AppData\Local\Programs\Python\Python310\lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests\test_video_models.py:4: in <module>
+    from apps.video.models import VideoProject, Track, Clip, MediaItem, TrackType
+apps\video\__init__.py:1: in <module>
+    from apps.video.main import VideoEditorWindow
+apps\video\main.py:3: in <module>
+    from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QFileDialog)
+E   ModuleNotFoundError: No module named 'PySide6'
+=========================== short test summary info ===========================
+ERROR tests/test_video_editor_smoke.py
+ERROR tests/test_video_models.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 2 errors in 0.12s ==============================

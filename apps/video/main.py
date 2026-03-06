@@ -88,6 +88,7 @@ class VideoEditorWindow(BaseMainWindow):
         self._transport.pause_clicked.connect(self._preview.pause)
         self._transport.stop_clicked.connect(self._preview.stop)
         self._transport.seek_changed.connect(self._preview.seek)
+        self._transport.seek_changed.connect(self._timeline.set_playhead)
 
         # Timeline -> Preview (playhead seek)
         self._timeline.playhead_moved.connect(self._preview.seek)

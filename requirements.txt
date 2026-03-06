@@ -8,3 +8,4 @@ pyjwt
 jinja2
 python-multipart
 aiofiles
+PySide6
