@@ -43,4 +43,19 @@ else {
     if ($LASTEXITCODE -ne 0) { Write-Error "Build failed"; exit 1 }
 }
 
+# 5. Build Executable with PyInstaller
+Write-Host "`n[5/6] Building Executable with PyInstaller..." -ForegroundColor Yellow
+poetry run pyinstaller --noconfirm --onedir --windowed --name "launcher" "launcher/main.py"
+if ($LASTEXITCODE -ne 0) { Write-Warning "PyInstaller build failed or PyInstaller not installed properly" }
+
+# 6. Build Installer with Inno Setup
+Write-Host "`n[6/6] Building Installer with Inno Setup..." -ForegroundColor Yellow
+$ISCC_Path = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+if (Test-Path $ISCC_Path) {
+    & $ISCC_Path "installer.iss"
+    if ($LASTEXITCODE -ne 0) { Write-Warning "Inno Setup compilation failed" }
+} else {
+    Write-Host "  Inno Setup (ISCC.exe) not found at $ISCC_Path, skipping installer build" -ForegroundColor DarkGray
+}
+
 Write-Host "`n=== Build complete ===" -ForegroundColor Green

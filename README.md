@@ -106,7 +106,7 @@ poetry run python launcher/main.py
 
 ### ビルド (Windows)
 
-PowerShellスクリプトでテスト・Lint・パッケージングを実行します：
+PowerShellスクリプトでテスト・Lint・実行ファイル化(PyInstaller)およびインストーラーの作成(Inno Setup)を実行します：
 
 ```powershell
 .\build.ps1
